@@ -8,6 +8,8 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <SPIFFS.h>
+#include <ArduinoOTA.h>
+
 WebServer server(80);
 
 #define DBG_OUTPUT_PORT Serial
@@ -19,9 +21,11 @@ aREST rest = aREST();
 
 OLED disp = OLED();
 
-const char *ssid = "RoboticHuskies";
-const char *password = "robotsrule";
+const char *ssid = "ROBOT_SUMO";
+const char *password = "";
 const char *host = "robot";
+
+void StartOTA();
 
 //holds the current upload
 File fsUploadFile;
@@ -298,6 +302,8 @@ void setup()
 	Serial.println("");
 	Serial.println("WiFi connected");
 
+	StartOTA();
+
 	// Start the server
 	wfserver.begin();
 	Serial.println("Server started");
@@ -362,6 +368,7 @@ void loop()
 {
 	server.handleClient();
 
+    ArduinoOTA.handle();
 	//disp.Reset();
 	//disp.WriteInt(hallRead());
 	//Serial.println(hallRead());
@@ -413,4 +420,41 @@ int backw(String command)
 	motorLeft.goBackward(255); // 0-255 value. Value of PWM. 		Motor max speed = 255
 	motorRight.goBackward(255);
 	return 1;
+}
+
+
+void StartOTA()
+{
+    ArduinoOTA
+        .onStart([]() {
+            String type;
+            if (ArduinoOTA.getCommand() == U_FLASH)
+                type = "sketch";
+            else // U_SPIFFS
+                type = "filesystem";
+
+            // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+            Serial.println("Start updating " + type);
+        })
+        .onEnd([]() {
+            Serial.println("\nEnd");
+        })
+        .onProgress([](unsigned int progress, unsigned int total) {
+            Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+        })
+        .onError([](ota_error_t error) {
+            Serial.printf("Error[%u]: ", error);
+            if (error == OTA_AUTH_ERROR)
+                Serial.println("Auth Failed");
+            else if (error == OTA_BEGIN_ERROR)
+                Serial.println("Begin Failed");
+            else if (error == OTA_CONNECT_ERROR)
+                Serial.println("Connect Failed");
+            else if (error == OTA_RECEIVE_ERROR)
+                Serial.println("Receive Failed");
+            else if (error == OTA_END_ERROR)
+                Serial.println("End Failed");
+        });
+
+    ArduinoOTA.begin();
 }
