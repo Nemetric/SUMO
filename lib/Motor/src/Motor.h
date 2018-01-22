@@ -11,7 +11,7 @@ class Motor
 {
   public:
     Motor(){};
-    void setInputs(int pinA,int pinB);
+    void setInputs(int pinA,int pinB,int chA, int chB);
 	void goForward(int pwm);
 	void goBackward(int pwm);
 	void motorstop();
@@ -19,6 +19,8 @@ class Motor
   private:
     int _pinA;
 	int _pinB;
+  int _chA;
+  int _chB;
 };
 
 
