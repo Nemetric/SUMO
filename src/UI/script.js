@@ -1,42 +1,26 @@
 $(document).ready(function () {
 
   // Device
-  var address = "r1.sumo:8080";
+  var address = "r1.su.mo:8080";
   var device = new Device(address);
 
-  // Buttons
-  $('#forward').on('mousedown touchstart', function () {
-    device.callFunction("forward");
-  });
-  $('#forward').on('mouseup touchend', function () {
-    device.callFunction("stop");
-  });
+  var authToken = 0;
 
-  $('#right').on('mousedown touchstart', function () {
-    device.callFunction("right");
-  });
-  $('#right').on('mouseup touchend', function () {
-    device.callFunction("stop");
-  });
+  device.callFunction("auth", "", function(data){
+    if(data.return_value != 0)
+      authToken = data.return_value;
+      else{
+        $(".container").html('Device Already In Use. Reboot Device to connect.');
+      }
 
-  $('#left').on('mousedown touchstart', function () {
-    device.callFunction("left");
-  });
-  $('#left').on('mouseup touchend', function () {
-    device.callFunction("stop");
-  });
-
-  $('#backward').on('mousedown touchstart', function () {
-    device.callFunction("backw");
-  });
-  $('#backward').on('mouseup touchend', function () {
-    device.callFunction("stop");
   });
 
   var $log = $("#log");
 
   var prevX = 0;
   var prevY = 0;
+
+  var awaitingCallback = false;
 
   function updateLog(x, y) {
     var deviceWidth = $(window).width();
@@ -46,14 +30,23 @@ $(document).ready(function () {
     valX = calcPercent(deviceWidth, x);
     valY = calcPercent(deviceHeight, y) * -1;
 
-    if(Math.abs(prevX - valX) > 10 || Math.abs(prevY - valY) > 10)
+    if(Math.abs(prevX - valX) > 1 || Math.abs(prevY - valY) > 1)
     {
         prevX = valX;
         prevY = valY;
 
         $log.html('X: ' + valX + '; Y: ' + valY);
 
-        device.callFunction("newxy", parseInt(valX) + ',' + parseInt(valY));
+        if(authToken != 0)
+        {
+          if(!awaitingCallback || ( parseInt(valX) == 0 && parseInt(valY) == 0))
+          {
+            awaitingCallback = true;
+            device.callFunction("newxy", parseInt(valX) + ',' + parseInt(valY) + ',' + authToken, function(){
+              awaitingCallback = false;
+            });
+          }
+        }
     }
 
   }

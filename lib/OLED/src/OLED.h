@@ -11,9 +11,11 @@ public:
   OLED(){};
 
   void init();
-  void writeHelloWold();
+  void writeYETIBOTICS();
+  void writeNEMETRIC();
   void Reset();
   void WriteString(String txt);
+  void WriteString(String txt, int x, int y);
   void WriteInt(int txt);
 
 private:
