@@ -11,6 +11,9 @@ class LedStrip
     void HeadlightsON();
 
 
+    void HeadlightsRandom();
+
+
     void LightColor(int indx, int r, int g, int b);
 
     void LightsOff();

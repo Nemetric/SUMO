@@ -36,13 +36,16 @@ void gpioSetup(int gpioNum, int gpioMode, int gpioVal)
 
 strand_t STRANDS[] = {
     // Avoid using any of the strapping pins on the ESP32
-    {.rmtChannel = 1, .gpioNum = 0, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 5, .pixels = nullptr, ._stateVars = nullptr},
-   // {.rmtChannel = 2, .gpioNum = 18, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 93, .pixels = nullptr, ._stateVars = nullptr},
-   // {.rmtChannel = 3, .gpioNum = 19, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 64, .pixels = nullptr, ._stateVars = nullptr},
+    {.rmtChannel = 1, .gpioNum = 17, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 5, .pixels = nullptr, ._stateVars = nullptr},
+    // {.rmtChannel = 2, .gpioNum = 18, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 93, .pixels = nullptr, ._stateVars = nullptr},
+    // {.rmtChannel = 3, .gpioNum = 19, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 64, .pixels = nullptr, ._stateVars = nullptr},
     //{.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2812B_V3, .brightLimit = 32, .numPixels = 256, .pixels = nullptr, ._stateVars = nullptr},
     //{.rmtChannel = 0, .gpioNum = 16, .ledType = LED_SK6812W_V1, .brightLimit = 32, .numPixels = 300, .pixels = nullptr, ._stateVars = nullptr},
     //{.rmtChannel = 0, .gpioNum = 16, .ledType = LED_WS2813_V2, .brightLimit = 32, .numPixels = 300, .pixels = nullptr, ._stateVars = nullptr},
 };
+
+
+
 int STRANDCNT = sizeof(STRANDS) / sizeof(STRANDS[0]);
 
 // Forward declarations
@@ -360,9 +363,9 @@ void LedStrip::Init()
      This optional gpioSetup() code helps avoid that problem programmatically.
   ****************************************************************************/
     gpioSetup(0, OUTPUT, LOW);
-   // gpioSetup(17, OUTPUT, LOW);
+    // gpioSetup(17, OUTPUT, LOW);
     //gpioSetup(18, OUTPUT, LOW);
-   // gpioSetup(19, OUTPUT, LOW);
+    // gpioSetup(19, OUTPUT, LOW);
 
     if (digitalLeds_initStrands(STRANDS, STRANDCNT))
     {
@@ -388,75 +391,86 @@ void LedStrip::Init()
 #endif
     }
     Serial.println("Init complete");
-
-  
 }
 
 void LedStrip::HeadlightsON()
 {
-  STRANDS[0].pixels[0] = pixelFromRGBW(255,20,147, 255);
-    STRANDS[0].pixels[1] = pixelFromRGBW(255,20,147, 255);
-    STRANDS[0].pixels[2] = pixelFromRGBW(255,20,147, 255);
-    STRANDS[0].pixels[3] = pixelFromRGBW(255,20,147, 255);
-    STRANDS[0].pixels[4] = pixelFromRGBW(255,20,147, 255);
+    STRANDS[0].pixels[0] = pixelFromRGBW(255, 255, 255, 255);
+    STRANDS[0].pixels[1] = pixelFromRGBW(255, 255, 255, 255);
+    STRANDS[0].pixels[2] = pixelFromRGBW(255, 255, 255, 255);
+    STRANDS[0].pixels[3] = pixelFromRGBW(255, 255, 255, 255);
+    STRANDS[0].pixels[4] = pixelFromRGBW(255, 255, 255, 255);
+    digitalLeds_updatePixels(&STRANDS[0]);
+}
+
+void LedStrip::HeadlightsRandom()
+{
+    int r = random(0,255);
+    int g = random(0,255);
+    int b = random(0,255);
+
+    STRANDS[0].pixels[0] = pixelFromRGBW(r, g, b, 0);
+    STRANDS[0].pixels[1] = pixelFromRGBW(r, g, b, 0);
+    STRANDS[0].pixels[2] = pixelFromRGBW(r, g, b, 0);
+    STRANDS[0].pixels[3] = pixelFromRGBW(r, g, b, 0);
+    STRANDS[0].pixels[4] = pixelFromRGBW(r, g, b, 0);
     digitalLeds_updatePixels(&STRANDS[0]);
 }
 
 void LedStrip::LightsOff()
 {
-    pixelColor_t col = pixelFromRGBW(0,0,0, 0);
-  STRANDS[0].pixels[0] = col; 
+    pixelColor_t col = pixelFromRGBW(0, 0, 0, 0);
+    STRANDS[0].pixels[0] = col;
     STRANDS[0].pixels[1] = col;
     STRANDS[0].pixels[2] = col;
     STRANDS[0].pixels[3] = col;
-    STRANDS[0].pixels[4] =col;
+    STRANDS[0].pixels[4] = col;
     digitalLeds_updatePixels(&STRANDS[0]);
 }
 
 void LedStrip::LightColor(int indx, int r, int g, int b)
 {
-     pixelColor_t col = pixelFromRGBW(r,g,b, 0);
-  STRANDS[0].pixels[indx] = col; 
+    pixelColor_t col = pixelFromRGBW(r, g, b, 0);
+    STRANDS[0].pixels[indx] = col;
     digitalLeds_updatePixels(&STRANDS[0]);
 }
 
 //void LedStrip::Task()
 //{
-   
-    
-    //strand_t *strands[] = {&STRANDS[0]};
 
-    //int m1 = getMaxMalloc(1 * 1024, 16 * 1024 * 1024);
+//strand_t *strands[] = {&STRANDS[0]};
 
-    //scanners(strands, 4, 0, 2000);
-    //scanners(strands, 3, 0, 2000);
-    //scanners(strands, 2, 0, 2000);
-    //scanners(strands, 1, 0, 2000);
-   // scanners(strands, 0, 0, 2000); // NOOP: empty strand array
+//int m1 = getMaxMalloc(1 * 1024, 16 * 1024 * 1024);
 
-   // rainbows(strands, 4, 0, 4000);
-   // rainbows(strands, 3, 0, 4000);
-   // rainbows(strands, 2, 0, 4000);
-   // rainbows(strands, 1, 0, 4000);
-   // rainbows(strands, 0, 0, 4000); // NOOP: empty strand array
+//scanners(strands, 4, 0, 2000);
+//scanners(strands, 3, 0, 2000);
+//scanners(strands, 2, 0, 2000);
+//scanners(strands, 1, 0, 2000);
+// scanners(strands, 0, 0, 2000); // NOOP: empty strand array
 
-   // int m2 = getMaxMalloc(1 * 1024, 16 * 1024 * 1024);
-   // assert(m2 >= m1); // Sanity check
+// rainbows(strands, 4, 0, 4000);
+// rainbows(strands, 3, 0, 4000);
+// rainbows(strands, 2, 0, 4000);
+// rainbows(strands, 1, 0, 4000);
+// rainbows(strands, 0, 0, 4000); // NOOP: empty strand array
 
-   // scanner(&STRANDS[2], 1, 2000);
-   // scanner(&STRANDS[2], 0, 2000);
-   // scanner(&STRANDS[2], 1, 2000); // A tiny delay can smooth things out
-   // scanner(&STRANDS[2], 5, 2000);
+// int m2 = getMaxMalloc(1 * 1024, 16 * 1024 * 1024);
+// assert(m2 >= m1); // Sanity check
 
-   // for (int i = 0; i < STRANDCNT; i++)
-   // {
-   //     strand_t *pStrand = &STRANDS[i];
-    //    rainbow(pStrand, 0, 2000);
-    //    scanner(pStrand, 0, 2000);
-    //    digitalLeds_resetPixels(pStrand);
-   // }
+// scanner(&STRANDS[2], 1, 2000);
+// scanner(&STRANDS[2], 0, 2000);
+// scanner(&STRANDS[2], 1, 2000); // A tiny delay can smooth things out
+// scanner(&STRANDS[2], 5, 2000);
+
+// for (int i = 0; i < STRANDCNT; i++)
+// {
+//     strand_t *pStrand = &STRANDS[i];
+//    rainbow(pStrand, 0, 2000);
+//    scanner(pStrand, 0, 2000);
+//    digitalLeds_resetPixels(pStrand);
+// }
 
 //#if DEBUG_ESP32_DIGITAL_LED_LIB
-   // dumpDebugBuffer(0, digitalLeds_debugBuffer);
+// dumpDebugBuffer(0, digitalLeds_debugBuffer);
 //#endif
 //}

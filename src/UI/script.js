@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
   // Device
-  var address = "r1.su.mo:8080";
+  var address = window.location.hostname + ":8080";
   var device = new Device(address);
 
   var authToken = 0;

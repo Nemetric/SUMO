@@ -56,15 +56,13 @@ void setup()
 	digitalWrite(25, HIGH);
 
 
-	
 	disp.init();
 	disp.writeNEMETRIC();
-
 
 	Serial.begin(115200);
 
 	ls.Init();
-	
+
 	//FastLED.addLeds<WS2812B, 0, RGB>(leds, 5);
 	//FastLED.addLeds<NEOPIXEL, 0>(leds, 5);
 
@@ -76,10 +74,9 @@ void setup()
 	//leds[4] = CRGB::Blue;
 	//FastLED.show();
 
-
 	// Init motor shield
-	motorLeft.setInputs(21, 22, 1, 2); // Pin One , Pin Two and PWM pin
-	motorRight.setInputs(18, 23, 3, 4);
+	motorLeft.setInputs(18, 23, 1, 2); // Pin One , Pin Two and PWM pin
+	motorRight.setInputs(22, 21, 3, 4);
 	pinMode(19, OUTPUT);
 	digitalWrite(19, HIGH);
 
@@ -111,13 +108,15 @@ void setup()
 	lastActivity = millis();
 
 	
+	pinMode(0, INPUT_PULLUP);
 }
-
+int authToken = 0;
+bool isPressed = false;
 void loop()
 {
 	//ls.Task();
 	//sleep after 5 minutes of no activity
-	if((lastActivity + (60000 * 1)) < millis())
+	if ((lastActivity + (60000 * 10)) < millis())
 	{
 		//SLEEP
 		ls.LightsOff();
@@ -126,9 +125,21 @@ void loop()
 		esp_deep_sleep_start();
 	}
 
-
 	ArduinoOTA.handle();
 	fs1.Task();
+
+    //Serial.println(digitalRead(0));
+	if(digitalRead(0) == 0 && authToken != 0)
+	{
+		if(!isPressed)
+		{
+			ls.HeadlightsRandom();
+		}
+		isPressed = true;
+	}
+	else{
+		isPressed = false;
+	}
 
 	// Handle REST calls
 	WiFiClient client = wfserver.available();
@@ -142,9 +153,7 @@ void loop()
 	}
 
 	rest.handle(client);
-
 }
-int authToken = 0;
 int auth(String command)
 {
 
@@ -152,7 +161,7 @@ int auth(String command)
 	{
 		authToken = random(1, 99999);
 		disp.WriteString("Device Locked!       ", 0, -100);
-		ls.HeadlightsON();
+		ls.HeadlightsRandom();
 		return authToken;
 	}
 
@@ -225,6 +234,15 @@ int newxy(String command)
 
 void ConnectToWIFI()
 {
+	int n = WiFi.scanNetworks();
+	for (int i = 0; i < n; ++i)
+	{
+		if(WiFi.SSID(i).startsWith("ROBOT_SUMO"))
+		{
+			ssid = WiFi.SSID(i).c_str();
+			break;
+		}
+	}
 
 	WiFi.begin(ssid, password);
 	while (WiFi.status() != WL_CONNECTED)
@@ -274,4 +292,12 @@ void SetHostName()
 	String mac = WiFi.macAddress();
 	if (mac == "30:AE:A4:55:E9:98")
 		HostName += "r1.su.mo";
+	else if (mac == "30:AE:A4:55:E3:20")
+		HostName += "r2.su.mo";
+	else if (mac == "30:AE:A4:6E:EE:9C")
+		HostName += "r3.su.mo";
+	else if (mac == "30:AE:A4:6F:06:30")
+		HostName += "r4.su.mo";
+	else
+		HostName += "unk.su.mo";
 }
